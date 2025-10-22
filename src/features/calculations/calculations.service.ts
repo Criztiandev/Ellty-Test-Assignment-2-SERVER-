@@ -5,7 +5,7 @@ import {
   addOperation as addOperationModel,
   buildCalculationTree,
 } from './calculations.model';
-import { ICalculationNode } from './calculations.types';
+import { ICalculationNode, ICalculation } from './calculations.types';
 
 /**
  * Calculate result based on operation
@@ -60,7 +60,10 @@ export const getCalculationsTree = async (): Promise<ICalculationNode[]> => {
 /**
  * Create a starting number (root calculation)
  */
-export const createStartingNumber = async (userId: number, number: number): Promise<any> => {
+export const createStartingNumber = async (
+  userId: number,
+  number: number
+): Promise<ICalculation> => {
   // Validate number limits
   if (number > 1_000_000 || number < -1_000_000) {
     throw new Error('Number exceeds limit (±1,000,000)');
@@ -89,7 +92,7 @@ export const createOperation = async (
   userId: number,
   operation: '+' | '-' | '*' | '/',
   number: number
-): Promise<any> => {
+): Promise<ICalculation> => {
   // Validate number limits
   if (number > 1_000_000 || number < -1_000_000) {
     throw new Error('Number exceeds limit (±1,000,000)');

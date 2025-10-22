@@ -41,11 +41,17 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response): Promise<
       payload: calculation,
       message: 'Starting number created successfully',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating starting number:', error);
 
     // Handle validation errors
-    if (error.name === 'ZodError') {
+    if (
+      error &&
+      typeof error === 'object' &&
+      'name' in error &&
+      error.name === 'ZodError' &&
+      'errors' in error
+    ) {
       res.status(400).json({
         error: error.errors,
         message: 'Validation failed',
@@ -54,7 +60,7 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response): Promise<
     }
 
     // Handle business logic errors
-    if (error.message) {
+    if (error instanceof Error && error.message) {
       res.status(400).json({
         error: error.message,
         message: error.message,
@@ -100,11 +106,17 @@ router.post('/:id/reply', authenticate, async (req: AuthRequest, res: Response):
       payload: calculation,
       message: 'Operation added successfully',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error adding operation:', error);
 
     // Handle validation errors
-    if (error.name === 'ZodError') {
+    if (
+      error &&
+      typeof error === 'object' &&
+      'name' in error &&
+      error.name === 'ZodError' &&
+      'errors' in error
+    ) {
       res.status(400).json({
         error: error.errors,
         message: 'Validation failed',
@@ -113,7 +125,7 @@ router.post('/:id/reply', authenticate, async (req: AuthRequest, res: Response):
     }
 
     // Handle "not found" errors
-    if (error.message?.includes('not found')) {
+    if (error instanceof Error && error.message?.includes('not found')) {
       res.status(404).json({
         error: error.message,
         message: error.message,
@@ -122,7 +134,7 @@ router.post('/:id/reply', authenticate, async (req: AuthRequest, res: Response):
     }
 
     // Handle business logic errors (division by zero, depth limit, etc.)
-    if (error.message) {
+    if (error instanceof Error && error.message) {
       res.status(400).json({
         error: error.message,
         message: error.message,

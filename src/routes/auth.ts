@@ -8,7 +8,6 @@ const router = Router();
 
 interface User {
   id: number;
-  email: string;
   username: string;
   password: string;
   role: string;
@@ -16,10 +15,10 @@ interface User {
 
 // Register
 router.post('/register', async (req: Request, res: Response): Promise<void> => {
-  const { email, username, password } = req.body;
+  const { username, password } = req.body;
 
-  if (!email || !username || !password) {
-    res.status(400).json({ error: 'Email, username and password are required' });
+  if (!username || !password) {
+    res.status(400).json({ error: 'Username and password are required' });
     return;
   }
 
@@ -27,18 +26,12 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     db.run(
-      'INSERT INTO users (email, username, password, role) VALUES (?, ?, ?, ?)',
-      [email, username, hashedPassword, 'user'],
+      'INSERT INTO users (username, password, role) VALUES (?, ?, ?)',
+      [username, hashedPassword, 'user'],
       function (err) {
         if (err) {
           if (err.message.includes('UNIQUE constraint failed')) {
-            if (err.message.includes('email')) {
-              res.status(400).json({ error: 'Email already exists' });
-            } else if (err.message.includes('username')) {
-              res.status(400).json({ error: 'Username already exists' });
-            } else {
-              res.status(400).json({ error: 'Email or username already exists' });
-            }
+            res.status(400).json({ error: 'Username already exists' });
           } else {
             res.status(500).json({ error: 'Error creating user' });
           }
@@ -56,7 +49,6 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
             token,
             user: {
               id: this.lastID,
-              email,
               username,
               role: 'user',
             },
@@ -72,52 +64,55 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
 
 // Login
 router.post('/login', async (req: Request, res: Response): Promise<void> => {
-  const { email, password } = req.body;
+  const { username, password } = req.body;
 
-  if (!email || !password) {
-    res.status(400).json({ error: 'Email and password are required' });
+  if (!username || !password) {
+    res.status(400).json({ error: 'Username and password are required' });
     return;
   }
 
-  db.get('SELECT * FROM users WHERE email = ?', [email], async (err, user: User | undefined) => {
-    if (err) {
-      res.status(500).json({ error: 'Error finding user' });
-      return;
-    }
+  db.get(
+    'SELECT * FROM users WHERE username = ?',
+    [username],
+    async (err, user: User | undefined) => {
+      if (err) {
+        res.status(500).json({ error: 'Error finding user' });
+        return;
+      }
 
-    if (!user) {
-      res.status(401).json({ error: 'Invalid credentials' });
-      return;
-    }
-
-    try {
-      const isValidPassword = await bcrypt.compare(password, user.password);
-
-      if (!isValidPassword) {
+      if (!user) {
         res.status(401).json({ error: 'Invalid credentials' });
         return;
       }
 
-      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || 'your-secret-key', {
-        expiresIn: '24h',
-      });
+      try {
+        const isValidPassword = await bcrypt.compare(password, user.password);
 
-      res.json({
-        payload: {
-          token,
-          user: {
-            id: user.id,
-            email: user.email,
-            username: user.username,
-            role: user.role,
+        if (!isValidPassword) {
+          res.status(401).json({ error: 'Invalid credentials' });
+          return;
+        }
+
+        const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || 'your-secret-key', {
+          expiresIn: '24h',
+        });
+
+        res.json({
+          payload: {
+            token,
+            user: {
+              id: user.id,
+              username: user.username,
+              role: user.role,
+            },
           },
-        },
-        message: 'Login successful',
-      });
-    } catch {
-      res.status(500).json({ error: 'Error during login' });
+          message: 'Login successful',
+        });
+      } catch {
+        res.status(500).json({ error: 'Error during login' });
+      }
     }
-  });
+  );
 });
 
 // Password Reset - Request token
