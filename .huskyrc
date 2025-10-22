@@ -1,0 +1,5 @@
+# Skip husky install in CI/production environments
+if [ "$CI" = "true" ] || [ "$NODE_ENV" = "production" ]; then
+  echo "Skipping husky install in CI/production environment"
+  exit 0
+fi
