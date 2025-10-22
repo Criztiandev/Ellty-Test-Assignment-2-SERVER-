@@ -14,20 +14,23 @@ export const db = new sqlite3.Database(dbPath, (err) => {
 export const initDatabase = () => {
   db.serialize(() => {
     // Create users table
-    db.run(`
+    db.run(
+      `
       CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         email TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
-    `, (err) => {
-      if (err) {
-        console.error('Error creating users table:', err.message);
-      } else {
-        console.log('Users table created or already exists');
+    `,
+      (err) => {
+        if (err) {
+          console.error('Error creating users table:', err.message);
+        } else {
+          console.log('Users table created or already exists');
+        }
       }
-    });
+    );
   });
 };
 

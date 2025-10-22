@@ -45,11 +45,11 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
         res.status(201).json({
           message: 'User created successfully',
           token,
-          userId: this.lastID
+          userId: this.lastID,
         });
       }
     );
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Error creating user' });
   }
 });
@@ -82,18 +82,16 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
         return;
       }
 
-      const token = jwt.sign(
-        { userId: user.id },
-        process.env.JWT_SECRET || 'your-secret-key',
-        { expiresIn: '24h' }
-      );
+      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || 'your-secret-key', {
+        expiresIn: '24h',
+      });
 
       res.json({
         message: 'Login successful',
         token,
-        userId: user.id
+        userId: user.id,
       });
-    } catch (error) {
+    } catch {
       res.status(500).json({ error: 'Error during login' });
     }
   });
