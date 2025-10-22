@@ -101,3 +101,4 @@ The application uses SQLite with the following schema:
 - `email` - TEXT UNIQUE NOT NULL
 - `password` - TEXT NOT NULL (hashed with bcrypt)
 - `created_at` - DATETIME DEFAULT CURRENT_TIMESTAMP
+# Ellty-Test-Assignment-2-SERVER-
