@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { initDatabase } from './config/database';
 import authRoutes from './routes/auth';
+import calculationsRoutes from './features/calculations/calculations.routes';
 
 dotenv.config();
 
@@ -18,11 +19,12 @@ app.use(express.urlencoded({ extended: true }));
 initDatabase();
 
 // Routes
-app.get('/', (req: Request, res: Response) => {
+app.get('/', (_req: Request, res: Response) => {
   res.json({ message: 'Welcome to Express TypeScript server!' });
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/calculations', calculationsRoutes);
 
 // Start server
 app.listen(PORT, () => {
