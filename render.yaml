@@ -2,7 +2,7 @@ services:
   - type: web
     name: express-server
     env: node
-    region: sydney
+    region: ap-southeast-2
     plan: free
     buildCommand: npm install && npm run build
     startCommand: npm start
